@@ -1,5 +1,5 @@
 import prisma from "@/app/lib/prisma";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import {z} from 'zod'
 
 const streamSchema = z.object({
@@ -28,7 +28,22 @@ export async function POST(req: NextRequest){
                 type: "Youtube"
             }
         })
-    } catch (error) {
-        
+    } catch (e) {
+        return NextResponse.json({
+                    message: "Error in Upvotes"
+                }, {status: 401})
     }
+}
+
+export async function GET(req: NextRequest){
+    const creatorId = req.nextUrl.searchParams.get("creatorId")
+    const streams = await prisma.stream.findMany({
+        where: {
+            userId: creatorId ?? ""
+        }
+    })
+
+    return NextResponse.json({
+        streams
+    })
 }
