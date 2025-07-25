@@ -1,39 +1,83 @@
 import prisma from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import {z} from 'zod'
+import { z } from "zod";
+import { authOptions } from "../../auth/[...nextauth]/route";
 
 const DownvoteSchema = z.object({
-    streamId: z.string()
-})
+  streamId: z.string(),
+});
 
-export async function POST(req: NextRequest){
-    const seesion = await getServerSession()
-    const user = await prisma.user.findFirst({
-        where:{
-            email: seesion?.user?.email
-        }
-    })
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.email) {
+    return NextResponse.json(
+      {
+        message: "No session or email found",
+      },
+      { status: 401 }
+    );
+  }
 
-    if(!user){
-        return Response.json({
-            message: "No user found",
-        },{status: 403})
+  const user = await prisma.listner.findFirst({
+    where: {
+      email: session.user.email,
+    },
+  });
+
+  if (!user) {
+    return NextResponse.json(
+      {
+        message: "No user found",
+      },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await req.json();
+    const data = DownvoteSchema.parse(body);
+
+    // Check if upvote exists before trying to delete
+    const existingUpvote = await prisma.upvote.findFirst({
+      where: {
+        userId: user.id,
+        streamId: data.streamId,
+      },
+    });
+
+    if (!existingUpvote) {
+      return NextResponse.json(
+        {
+          message: "No upvote found to remove",
+        },
+        { status: 409 } 
+      );
     }
 
-    try {
-        const data = DownvoteSchema.parse(req.json())
-        await prisma.upvote.delete({
-            where: {
-                userId_streamId: {
-                    userId: user.id,
-                    streamId: data.streamId
-                }
-            }
-        })
-    } catch (e) {
-        return NextResponse.json({
-            message: "Error in downvotes"
-        }, {status: 401})
-    }
+    await prisma.upvote.delete({
+      where: {
+        userId_streamId: {
+          userId: user.id,
+          streamId: data.streamId,
+        },
+      },
+    });
+
+    return NextResponse.json({
+      message: "Removed upvote (downvoted)"
+    });
+
+  } catch (e) {
+    console.error("Downvote error:", e);
+    
+    return NextResponse.json(
+      {
+        message: "Error in downvotes",
+        error: e instanceof Error ? e.message : "Unknown error"
+      },
+      { status: 500 } 
+    );
+  }
 }

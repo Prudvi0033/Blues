@@ -32,7 +32,7 @@ export async function POST(req: NextRequest){
                 url: data.url,
                 extractedId,
                 type: "Youtube",
-                title: ytData.title,
+                title: ytData.title ?? "can't find title",
                 thumbnail: thumbnailUrl
             } 
         })
