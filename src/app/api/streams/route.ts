@@ -1,6 +1,8 @@
 import prisma from "@/app/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import {z} from 'zod'
+//@ts-ignore
+import youtubesearchapi from 'youtube-search-api'
 
 const streamSchema = z.object({
     creatorId: z.string(),
@@ -9,28 +11,39 @@ const streamSchema = z.object({
 
 export async function POST(req: NextRequest){
     try {
-        const data = streamSchema.parse(req.json())
-        const isNotUrl = data.url.includes("youtube") || data.url.includes("spotify")
+        const body = await req.json()
+        const data = streamSchema.parse(body)
+        const isNotUrl = data.url.includes("youtube") 
 
         if(!isNotUrl){
             return Response.json({
                 message: "Check your URL"
             })
         }
-
+        
+        
         const extractedId = data.url.split("?v=")[1]
+        const ytData = await youtubesearchapi.GetVideoDetails(extractedId)
+        const thumbnailUrl = ytData.thumbnail?.thumbnails?.at(-1)?.url ?? "";
 
-        await prisma.stream.create({
+        const stream = await prisma.stream.create({
             data: {
                 userId: data.creatorId,
                 url: data.url,
                 extractedId,
-                type: "Youtube"
-            }
+                type: "Youtube",
+                title: ytData.title,
+                thumbnail: thumbnailUrl
+            } 
         })
-    } catch (e) {
         return NextResponse.json({
-                    message: "Error in Upvotes"
+            message: "Added stream",
+            id: stream.id
+        }, {status: 200})
+    } catch (e) {
+        console.log(e);
+        return NextResponse.json({
+                    message: "Error in Streams"
                 }, {status: 401})
     }
 }
