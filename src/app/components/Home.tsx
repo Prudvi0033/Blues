@@ -3,6 +3,7 @@ import { Lobster, Montserrat, Raleway } from "next/font/google";
 import Symphony from "./Symphony";
 import MusicNote from "./MusicNote";
 import Snote from "./Snote";
+import Slider from "./Slider";
 
 const rale = Raleway({ subsets: ["latin"] });
 const monte = Montserrat({ subsets: ["latin"] });
@@ -11,8 +12,8 @@ const pari = Lobster({ subsets: ["latin"], weight: "400" });
 const Home = () => {
   return (
     <div className="min-h-screen flex items-center justify-center relative">
-      <div className="w-[40rem] py-24 h-screen relative">
-        <div className="flex items-center justify-center">
+      <div className="w-full max-w-[40rem] py-12 relative px-4">
+        <div className="flex items-center justify-center mb-2">
           <div className="bg-white/60 rounded-2xl border shadow-[inset_3px_3px_6px_#ffffff90,_inset_-3px_-3px_6px_#c8d4e6] border-blue-100/40 px-3 py-1 flex gap-x-2 items-center backdrop-blur-sm">
             <div className="bg-gradient-to-tr from-blue-400 to-blue-300 h-4 w-4 rounded-full shadow-lg"></div>
             <div className={`text-slate-700/80 ${monte.className} text-sm font-medium`}>
@@ -21,8 +22,9 @@ const Home = () => {
           </div>
         </div>
         
-        <div className="text-7xl relative flex flex-col -space-y-1 items-center justify-start">
-          {/* Music notes - hidden on mobile (md:block = show on medium screens and up) */}
+        {/* Main Typography Section */}
+        <div className="lg:text-7xl text-6xl relative flex flex-col -space-y-1 items-center justify-start mb-12">
+          {/* Music notes - hidden on mobile */}
           <div className="absolute -top-8 left-6 opacity-90 -rotate-12 scale-35 hidden md:block">
             <MusicNote />
           </div>
@@ -35,7 +37,7 @@ const Home = () => {
             A new
           </h1>
           
-          <div className="opacity-90 px-1 py-1 scale-[1.2]">
+          <div className="opacity-90 px-1 py-1 scale-[1] lg:scale-[1.2]">
             <Symphony />
           </div>
           
@@ -62,6 +64,10 @@ const Home = () => {
           <div className="absolute bottom-8 left-20 opacity-45 -rotate-15 scale-40 hidden md:block">
             <MusicNote />
           </div>
+        </div>
+
+        <div className="w-full">
+          <Slider />
         </div>
       </div>
     </div>
