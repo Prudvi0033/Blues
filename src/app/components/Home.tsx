@@ -1,5 +1,5 @@
 import React from "react";
-import { Lobster, Montserrat, Raleway } from "next/font/google";
+import { Montserrat, Raleway } from "next/font/google";
 import Symphony from "./Symphony";
 import MusicNote from "./MusicNote";
 import Snote from "./Snote";
@@ -7,24 +7,21 @@ import Slider from "./Slider";
 
 const rale = Raleway({ subsets: ["latin"] });
 const monte = Montserrat({ subsets: ["latin"] });
-const pari = Lobster({ subsets: ["latin"], weight: "400" });
 
 const Home = () => {
   return (
     <div className="min-h-screen flex items-center justify-center relative">
-      <div className="w-full max-w-[40rem] py-12 relative px-4">
+      <div className="w-full max-w-[40rem] py-12 relative px-4 select-none">
         <div className="flex items-center justify-center mb-2">
-          <div className="bg-white/60 rounded-2xl border shadow-[inset_3px_3px_6px_#ffffff90,_inset_-3px_-3px_6px_#c8d4e6] border-blue-100/40 px-3 py-1 flex gap-x-2 items-center backdrop-blur-sm">
-            <div className="bg-gradient-to-tr from-blue-400 to-blue-300 h-4 w-4 rounded-full shadow-lg"></div>
-            <div className={`text-slate-700/80 ${monte.className} text-sm font-medium`}>
+          <div className="bg-white/60 rounded-2xl border shadow-[inset_3px_3px_6px_#ffffff90,_inset_-3px_-3px_6px_#c8d4e6] border-blue-100/40 px-2 py-0.5 flex gap-x-1 items-center backdrop-blur-sm">
+            <div className="bg-gradient-to-tr from-blue-400 to-blue-300 h-[10px] w-[10px] rounded-full shadow-lg"></div>
+            <div className={`text-slate-700/80 ${monte.className} text-[11px] font-semibold`}>
               Blues
             </div>
           </div>
         </div>
         
-        {/* Main Typography Section */}
         <div className="lg:text-7xl text-6xl relative flex flex-col -space-y-1 items-center justify-start mb-12">
-          {/* Music notes - hidden on mobile */}
           <div className="absolute -top-8 left-6 opacity-90 -rotate-12 scale-35 hidden md:block">
             <MusicNote />
           </div>
