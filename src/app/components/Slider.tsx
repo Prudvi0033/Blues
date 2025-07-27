@@ -17,7 +17,7 @@ const Slider = () => {
         className="bg-white/60 w-2/3 relative rounded-full border shadow-[inset_3px_3px_6px_#ffffff90,_inset_-3px_-3px_6px_#c8d4e6] border-blue-100/40 px-2 py-4 backdrop-blur-sm overflow-hidden"
       >
         <motion.div
-          initial={{left: 10}}
+          initial={{left: 7}}
           drag="x"
           dragConstraints={{left: 10, right: 352}}
           dragElastic={0.1}
