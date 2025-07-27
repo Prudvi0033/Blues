@@ -4,6 +4,7 @@ import Symphony from "./Symphony";
 import MusicNote from "./MusicNote";
 import Snote from "./Snote";
 import Slider from "./Slider";
+import Header from "./Header";
 
 const rale = Raleway({ subsets: ["latin"] });
 const monte = Montserrat({ subsets: ["latin"] });
@@ -11,6 +12,9 @@ const monte = Montserrat({ subsets: ["latin"] });
 const Home = () => {
   return (
     <div className="min-h-screen flex items-center justify-center relative">
+      <div className="absolute top-5">
+        <Header/>
+      </div>
       <div className="w-full max-w-[40rem] py-12 relative px-4 select-none">
         <div className="flex items-center justify-center mb-2">
           <div className="bg-white/60 rounded-2xl border shadow-[inset_3px_3px_6px_#ffffff90,_inset_-3px_-3px_6px_#c8d4e6] border-blue-100/40 px-2 py-0.5 flex gap-x-1 items-center backdrop-blur-sm">
@@ -22,11 +26,13 @@ const Home = () => {
         </div>
         
         <div className="lg:text-7xl text-6xl relative flex flex-col -space-y-1 items-center justify-start mb-12">
-          <div className="absolute -top-8 left-6 opacity-90 -rotate-12 scale-35 hidden md:block">
+          {/* Top left music note - positioned above "A new" */}
+          <div className="absolute -top-12 -left-4 lg:-left-8 opacity-70 -rotate-12 scale-50 lg:scale-60">
             <MusicNote />
           </div>
           
-          <div className="absolute -top-2 right-16 opacity-80 rotate-20 scale-60 hidden md:block">
+          {/* Top right music note - positioned above "A new" */}
+          <div className="absolute -top-8 -right-2 lg:-right-6 opacity-75 rotate-15 scale-45 lg:scale-55">
             <Snote />
           </div>
           
@@ -38,29 +44,34 @@ const Home = () => {
             <Symphony />
           </div>
           
-          <div className="absolute top-28 left-4 opacity-90 rotate-35 scale-35 hidden md:block">
+          {/* Left side music note - next to "through united" */}
+          <div className="absolute top-20 lg:top-24 -left-6 lg:-left-12 opacity-65 rotate-25 scale-55 lg:scale-65">
             <Snote />
+          </div>
+          
+          {/* Right side music note - next to "through united" */}
+          <div className="absolute top-16 lg:top-20 -right-4 lg:-right-10 opacity-30 -rotate-20 scale-50 lg:scale-60">
+            <MusicNote />
           </div>
           
           <h1 className={`${rale.className} font-extrabold text-neutral-800/90`}>
             through united
           </h1>
           
-          <div className="absolute top-40 -left-8 opacity-60 -rotate-25 scale-65 hidden md:block">
-            <MusicNote />
-          </div>
-          
           <h1 className={`${rale.className} font-extrabold text-neutral-800/90`}>
             soundspaces.
           </h1>
           
-          <div className="absolute bottom-2 right-6 opacity-85 rotate-30 scale-70 hidden md:block">
+          <div className="absolute -bottom-28 -left-2 lg:-left-8 opacity-35 -rotate-40 scale-45 lg:scale-55">
+            <MusicNote />
+          </div>
+          
+          <div className="absolute -bottom-6 -right-4 lg:-right-8 opacity-70 rotate-35 scale-60 lg:scale-70">
             <Snote />
           </div>
           
-          <div className="absolute bottom-8 left-20 opacity-45 -rotate-15 scale-40 hidden md:block">
-            <MusicNote />
-          </div>
+          
+          
         </div>
 
         <div className="w-full">
