@@ -4,7 +4,7 @@ import Symphony from "./Symphony";
 import MusicNote from "./MusicNote";
 import Snote from "./Snote";
 import Slider from "./Slider";
-import Header from "./Header";
+import MercuryCard from "./MercuryCard";
 
 const rale = Raleway({ subsets: ["latin"] });
 const monte = Montserrat({ subsets: ["latin"] });
@@ -12,9 +12,9 @@ const monte = Montserrat({ subsets: ["latin"] });
 const Home = () => {
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center relative">
+      <div className="min-h-screen flex items-center justify-center relative pt-12">
         <div className="absolute top-5">
-          <Header />
+          <MercuryCard/>
         </div>
         <div className="w-full max-w-[40rem] py-12 relative px-4 select-none">
           <div className="flex items-center justify-center mb-2">
@@ -85,7 +85,6 @@ const Home = () => {
           </div>
         </div>
       </div>
-      
 
     </>
   );
