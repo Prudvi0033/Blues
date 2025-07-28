@@ -1,5 +1,4 @@
 import React from "react";
-import { IoMusicalNotes } from "react-icons/io5";
 import { Montserrat } from "next/font/google";
 import Snote from "./Snote";
 const rale = Montserrat({ subsets: ["latin"] });

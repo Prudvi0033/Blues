@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
-import { IoAdd } from 'react-icons/io5';
+import { IoArrowForward } from 'react-icons/io5';
+import { Montserrat } from 'next/font/google';
+import { BiPlus } from 'react-icons/bi';
+
+const rale = Montserrat({ subsets: ['latin'] });
 
 interface AddSongProps {
-  onAddSong: (title: string, artist: string) => void;
+  onAddSong: (title: string) => void;
 }
 
 const AddSong: React.FC<AddSongProps> = ({ onAddSong }) => {
   const [title, setTitle] = useState('');
-  const [artist, setArtist] = useState('');
 
   const handleSubmit = () => {
-    if (title.trim() && artist.trim()) {
-      onAddSong(title.trim(), artist.trim());
+    if (title.trim()) {
+      onAddSong(title.trim());
       setTitle('');
-      setArtist('');
     }
   };
 
@@ -24,37 +26,25 @@ const AddSong: React.FC<AddSongProps> = ({ onAddSong }) => {
   };
 
   return (
-    <div className="bg-blue-50/60 backdrop-blur-sm border border-blue-200/40 rounded-xl p-4 mb-4 shadow-sm">
-      <h3 className="text-lg font-medium text-blue-800 mb-3 flex items-center">
-        <IoAdd className="mr-2" />
+    <div className=" ">
+      <h3 className={`text-sm ${rale.className} font-semibold text-cyan-500 mb-3 flex items-center`}>
+        <BiPlus className="mr-1 size-4 rotate-180" />
         Add New Song
       </h3>
-      <div className="space-y-3">
-        <div>
-          <input
-            type="text"
-            placeholder="Song title..."
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onKeyPress={handleKeyPress}
-            className="w-full px-4 py-2 bg-white/70 border border-blue-200/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-transparent text-blue-900 placeholder-blue-400"
-          />
-        </div>
-        <div>
-          <input
-            type="text"
-            placeholder="Artist name..."
-            value={artist}
-            onChange={(e) => setArtist(e.target.value)}
-            onKeyPress={handleKeyPress}
-            className="w-full px-4 py-2 bg-white/70 border border-blue-200/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-transparent text-blue-900 placeholder-blue-400"
-          />
-        </div>
+      <div className="flex items-center space-x-3">
+        <input
+          type="text"
+          placeholder="Enter URL"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          onKeyPress={handleKeyPress}
+          className={`flex-1 ${rale.className} px-4 py-2 placeholder: text-cyan-700 relative border-none focus: outline-none bg-white/75 backdrop-blur-md border border-cyan-200/50 rounded-4xl p-4 shadow-[inset_3px_3px_6px_#ffffff90,_inset_-3px_-3px_6px_#d0faff]`}
+        />
         <button
           onClick={handleSubmit}
-          className="w-full bg-blue-500/80 hover:bg-blue-600/80 text-white py-2 px-4 rounded-lg transition-colors duration-200 font-medium shadow-sm hover:shadow-md"
+          className="p-2 absolute right-13 bg-gradient-to-r from-cyan-500 to-cyan-900 hover:scale-95 cursor-pointer rounded-full transition-all duration-200 flex items-center justify-center shadow-md"
         >
-          Add Song
+          <IoArrowForward className="text-lg text-white/80" />
         </button>
       </div>
     </div>

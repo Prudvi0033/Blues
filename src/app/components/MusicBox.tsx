@@ -97,7 +97,7 @@ const MusicBox: React.FC<MusicBoxProps> = ({ onClose }) => {
 
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-gradient-to-tl from-cyan-500 via-cyan-700 to-cyan-900 text-white shadow-lg transition-all duration-200 hover:scale-105"
+          className="absolute top-10 right-14 z-20 p-2.5 rounded-full bg-gradient-to-tl from-cyan-500 via-cyan-700 to-cyan-900 text-white shadow-lg transition-all duration-200 hover:scale-105"
         >
           <IoClose className="text-lg" />
         </button>
@@ -106,12 +106,11 @@ const MusicBox: React.FC<MusicBoxProps> = ({ onClose }) => {
           <Nav />
 
           {/* 🔹 AddSong Section (Row 1) */}
-          <div className="p-4">
+          <div className="px-9">
             <AddSong onAddSong={addSong} />
           </div>
 
-          {/* 🔹 Upcoming + Now Playing (Row 2) */}
-          <div className="flex-1 p-4 overflow-hidden">
+          <div className="flex-1 px-9 py-6 overflow-hidden">
             <div className="flex flex-col md:flex-row gap-6 h-full">
               <div className="flex-1 overflow-y-auto">
                 <UpcomingSongs songs={songs} onVote={handleVote} />
