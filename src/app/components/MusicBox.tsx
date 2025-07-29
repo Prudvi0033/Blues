@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from "react";
+// components/MusicBox.tsx
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { IoClose } from "react-icons/io5";
-import Nav from "./Nav";
 import AddSong from "./AddSong";
-import UpcomingSongs from "./UpcomingSongs";
+import { Montserrat } from "next/font/google";
+import StreamList from "./StreamList";
 import NowPlaying from "./NowPlaying";
-import axios from 'axios'
 
-export interface Song {
+const rale = Montserrat({ subsets: ['latin'] });
+
+export interface Stream {
   id: number;
   title: string;
-  artist: string;
-  image: string;
+  thumbnail: string;
   upvotes: number;
-  downvotes: number;
 }
 
 export interface MusicBoxProps {
@@ -21,84 +22,37 @@ export interface MusicBoxProps {
 
 const REFRESH_INTERVAL = 10 * 1000;
 
-const getStreams = async () => {
-  try {
-    const res = await axios.get('/api/streams/my', {
-    withCredentials: true
-  });
-  console.log(res.data);
-  } catch (err) {
-    console.error('Failed to fetch streams:', err);
-  }
-}
-
 const MusicBox: React.FC<MusicBoxProps> = ({ onClose }) => {
-  const [songs, setSongs] = useState<Song[]>([
-    {
-      id: 1,
-      title: "Blinding Lights",
-      artist: "The Weeknd",
-      image: "",
-      upvotes: 15,
-      downvotes: 2,
-    },
-    {
-      id: 2,
-      title: "Shape of You",
-      artist: "Ed Sheeran",
-      image: "",
-      upvotes: 12,
-      downvotes: 1,
-    },
-    {
-      id: 3,
-      title: "Watermelon Sugar",
-      artist: "Harry Styles",
-      image: "",
-      upvotes: 8,
-      downvotes: 3,
-    },
-  ]);
+  const [streams, setStreams] = useState<Stream[]>([]);
 
-  const [currentSong, setCurrentSong] = useState<Song | null>(null);
+  const fetchStreams = async () => {
+    try {
+      const res = await axios.get("/api/streams/my", { withCredentials: true });
+      const { streams } = res.data;
+      const parsed: Stream[] = streams.map((stream: Stream) => ({
+        id: stream.id,
+        title: stream.title,
+        thumbnail: stream.thumbnail,
+        upvotes: stream.upvotes,
+      }));
+      setStreams(parsed);
+    } catch (error) {
+      console.error("Failed to fetch streams", error);
+    }
+  };
 
   useEffect(() => {
-    getStreams()
-    setInterval(() => {}, REFRESH_INTERVAL);
+    fetchStreams();
+    const interval = setInterval(fetchStreams, REFRESH_INTERVAL);
+    return () => clearInterval(interval);
   }, []);
 
-  const addSong = ({ title, artist }: { title: string; artist: string }) => {
-    const newSong: Song = {
-      id: Date.now(),
-      title,
-      artist,
-      image: "",
-      upvotes: 0,
-      downvotes: 0,
-    };
-    setSongs([...songs, newSong]);
-  };
-
-  const handleVote = (id: number, type: "up" | "down") => {
-    setSongs(
-      songs.map((song) =>
-        song.id === id
-          ? {
-              ...song,
-              [type === "up" ? "upvotes" : "downvotes"]:
-                song[type === "up" ? "upvotes" : "downvotes"] + 1,
-            }
-          : song
+  const handleVote = (id: number) => {
+    setStreams((prev) =>
+      prev.map((stream) =>
+        stream.id === id ? { ...stream, upvotes: stream.upvotes + 1 } : stream
       )
     );
-  };
-
-  const playNext = () => {
-    if (songs.length > 0) {
-      const nextSong = songs[0];
-      setCurrentSong(nextSong);
-      setSongs(songs.slice(1));
-    }
   };
 
   return (
@@ -112,32 +66,23 @@ const MusicBox: React.FC<MusicBoxProps> = ({ onClose }) => {
           backgroundBlendMode: "overlay",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-transparent z-0 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-transparent z-0 pointer-events-none" />
 
         <button
           onClick={onClose}
-          className="absolute top-10 right-14 z-20 p-2.5 rounded-full bg-gradient-to-tl from-cyan-500 via-cyan-700 to-cyan-900 text-white shadow-lg transition-all duration-200 hover:scale-105"
+          className="absolute top-4 right-11 z-20 p-2.5 rounded-full bg-gradient-to-tl from-cyan-500 via-cyan-700 to-cyan-900 text-white shadow-lg transition-all duration-200 hover:scale-105"
         >
           <IoClose className="text-lg" />
         </button>
 
-        <div className="relative z-10 h-full flex flex-col">
-          <Nav />
-
-          {/* 🔹 AddSong Section (Row 1) */}
-          <div className="px-9">
-            <AddSong onAddSong={addSong} />
+        <div className="relative z-10 h-full flex flex-col p-8 text-white">
+          <div className="mt-4">
+            <AddSong />
           </div>
 
-          <div className="flex-1 px-9 py-6 overflow-hidden">
-            <div className="flex flex-col md:flex-row gap-6 h-full">
-              <div className="flex-1 overflow-y-auto">
-                <UpcomingSongs songs={songs} onVote={handleVote} />
-              </div>
-              <div className="w-full md:w-[40%]">
-                <NowPlaying currentSong={currentSong} onPlayNext={playNext} />
-              </div>
-            </div>
+          <div className="grid grid-cols-2 gap-4">
+            <StreamList streams={streams} onVote={handleVote} />
+            <NowPlaying currentSong={""} onPlayNext={""} />
           </div>
         </div>
       </div>
