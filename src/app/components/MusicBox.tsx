@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { IoClose } from 'react-icons/io5';
-import Nav from './Nav';
-import AddSong from './AddSong';
-import UpcomingSongs from './UpcomingSongs';
-import NowPlaying from './NowPlaying';
+import React, { useEffect, useState } from "react";
+import { IoClose } from "react-icons/io5";
+import Nav from "./Nav";
+import AddSong from "./AddSong";
+import UpcomingSongs from "./UpcomingSongs";
+import NowPlaying from "./NowPlaying";
+import axios from 'axios'
 
 export interface Song {
   id: number;
@@ -18,29 +19,42 @@ export interface MusicBoxProps {
   onClose: () => void;
 }
 
+const REFRESH_INTERVAL = 10 * 1000;
+
+const getStreams = async () => {
+  try {
+    const res = await axios.get('/api/streams/my', {
+    withCredentials: true
+  });
+  console.log(res.data);
+  } catch (err) {
+    console.error('Failed to fetch streams:', err);
+  }
+}
+
 const MusicBox: React.FC<MusicBoxProps> = ({ onClose }) => {
   const [songs, setSongs] = useState<Song[]>([
     {
       id: 1,
-      title: 'Blinding Lights',
-      artist: 'The Weeknd',
-      image: '',
+      title: "Blinding Lights",
+      artist: "The Weeknd",
+      image: "",
       upvotes: 15,
       downvotes: 2,
     },
     {
       id: 2,
-      title: 'Shape of You',
-      artist: 'Ed Sheeran',
-      image: '',
+      title: "Shape of You",
+      artist: "Ed Sheeran",
+      image: "",
       upvotes: 12,
       downvotes: 1,
     },
     {
       id: 3,
-      title: 'Watermelon Sugar',
-      artist: 'Harry Styles',
-      image: '',
+      title: "Watermelon Sugar",
+      artist: "Harry Styles",
+      image: "",
       upvotes: 8,
       downvotes: 3,
     },
@@ -48,26 +62,31 @@ const MusicBox: React.FC<MusicBoxProps> = ({ onClose }) => {
 
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
 
-  const addSong = (title: string, artist: string) => {
+  useEffect(() => {
+    getStreams()
+    setInterval(() => {}, REFRESH_INTERVAL);
+  }, []);
+
+  const addSong = ({ title, artist }: { title: string; artist: string }) => {
     const newSong: Song = {
       id: Date.now(),
       title,
       artist,
-      image: '',
+      image: "",
       upvotes: 0,
       downvotes: 0,
     };
     setSongs([...songs, newSong]);
   };
 
-  const handleVote = (id: number, type: 'up' | 'down') => {
+  const handleVote = (id: number, type: "up" | "down") => {
     setSongs(
       songs.map((song) =>
         song.id === id
           ? {
               ...song,
-              [type === 'up' ? 'upvotes' : 'downvotes']:
-                song[type === 'up' ? 'upvotes' : 'downvotes'] + 1,
+              [type === "up" ? "upvotes" : "downvotes"]:
+                song[type === "up" ? "upvotes" : "downvotes"] + 1,
             }
           : song
       )
@@ -88,9 +107,9 @@ const MusicBox: React.FC<MusicBoxProps> = ({ onClose }) => {
         className="w-[95%] max-w-6xl h-[90vh] rounded-2xl backdrop-blur-md border/60 border-white shadow-2xl relative overflow-hidden"
         style={{
           backgroundImage: "url('/image.png')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundBlendMode: 'overlay',
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundBlendMode: "overlay",
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-transparent z-0 pointer-events-none"></div>
