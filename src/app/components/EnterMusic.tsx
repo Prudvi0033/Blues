@@ -85,7 +85,7 @@ const EnterMusic = () => {
               onClick={(e) => e.stopPropagation()}
               className="relative max-w-6xl w-full mx-4"
             >
-              <MusicBox onClose={handleCloseModal} />
+              <MusicBox creatorId="" onClose={handleCloseModal} />
             </motion.div>
           </motion.div>
         )}

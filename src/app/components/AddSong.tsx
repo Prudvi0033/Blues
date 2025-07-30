@@ -1,3 +1,4 @@
+'use client'
 import React, { useState } from 'react';
 import { IoArrowForward } from 'react-icons/io5';
 import { Montserrat } from 'next/font/google';

@@ -1,10 +1,12 @@
-// components/MusicBox.tsx
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { IoClose } from "react-icons/io5";
-import AddSong from "./AddSong";
-import StreamList from "./StreamList";
+'use client';
 
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { IoClose, IoPower, IoShareSocial } from 'react-icons/io5';
+import AddSong from './AddSong';
+import StreamList from './StreamList';
+import { toast } from 'react-toastify';
+import { useSession, signIn } from 'next-auth/react';
 
 export interface Stream {
   id: number;
@@ -16,64 +18,113 @@ export interface Stream {
 
 export interface MusicBoxProps {
   onClose: () => void;
+  creatorId?: string;
 }
 
 const REFRESH_INTERVAL = 10 * 1000;
 
-const MusicBox: React.FC<MusicBoxProps> = ({ onClose }) => {
+const MusicBox: React.FC<MusicBoxProps> = ({ onClose, creatorId }) => {
+  const { data: session, status } = useSession();
   const [streams, setStreams] = useState<Stream[]>([]);
+  const [isOwner, setIsOwner] = useState(false);
+
+  const isMyStreams = !creatorId;
 
   const fetchStreams = async () => {
     try {
-      const res = await axios.get("/api/streams/my", { withCredentials: true });
-      const { streams } = res.data;
-      const parsed: Stream[] = streams.map((stream: Stream) => ({
+      const endpoint = isMyStreams
+        ? '/api/streams/my'
+        : `/api/streams/creator/${creatorId}`;
+      const res = await axios.get(endpoint);
+
+      const parsed: Stream[] = res.data.streams.map((stream: Stream) => ({
         id: stream.id,
         title: stream.title,
         thumbnail: stream.thumbnail,
         upvotes: stream.upvotes,
         hasUpvoted: stream.hasUpvoted,
       }));
+
       setStreams(parsed);
-      console.log(streams);
     } catch (error) {
-      console.error("Failed to fetch streams", error);
+      console.error('Failed to fetch streams', error);
     }
   };
 
-  useEffect(() => {
-    fetchStreams();
-    const interval = setInterval(fetchStreams, REFRESH_INTERVAL);
-    return () => clearInterval(interval);
-  }, []);
+  const handleShare = async () => {
+    try {
+      const shareURL = `${window.location.origin}/creator/${creatorId || session?.user?.email}`;
+      await navigator.clipboard.writeText(shareURL);
+      toast.success('Link Copied');
+    } catch (error) {
+      console.error('Share failed', error);
+    }
+  };
 
   const handleVote = async (id: number) => {
+    const targetStream = streams.find((s) => s.id === id);
+    if (!targetStream) return;
+
+    const alreadyUpvoted = targetStream.hasUpvoted;
+
     setStreams((prev) =>
-      prev.map((stream) =>
-        stream.id === id
+      prev.map((s) =>
+        s.id === id
           ? {
-              ...stream,
-              upvotes: stream.upvotes + (stream.hasUpvoted ? -1 : 1),
-              hasUpvoted: !stream.hasUpvoted,
+              ...s,
+              hasUpvoted: !alreadyUpvoted,
+              upvotes: s.upvotes + (alreadyUpvoted ? -1 : 1),
             }
-          : stream
+          : s
       )
     );
 
     try {
-      const stream = streams.find((s) => s.id == id);
-      if(!stream) return;
+      const route = alreadyUpvoted
+        ? '/api/streams/downvotes'
+        : '/api/streams/upvotes';
 
-      const route = stream.hasUpvoted ? "/api/streams/downvotes" : "/api/streams/upvotes"
-      
-      await axios.post(route, 
-        {streamId: id},
-        {withCredentials: true}
-      )
+      await axios.post(route, { streamId: id }, { withCredentials: true });
     } catch (error) {
-      console.log("Error in votes", error);
+      console.error('Voting error', error);
     }
   };
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetchStreams();
+      const interval = setInterval(fetchStreams, REFRESH_INTERVAL);
+      return () => clearInterval(interval);
+    }
+  }, [creatorId, status]);
+
+  useEffect(() => {
+    if (!creatorId || creatorId === session?.user?.email) {
+      setIsOwner(true);
+    }
+  }, [creatorId, session]);
+
+  if (status === 'unauthenticated') {
+    return (
+      <div className="w-full h-[90vh] flex justify-center items-center">
+        <button
+          onClick={() => signIn()}
+          className="w-20 h-20 rounded-full bg-gradient-to-tr from-gray-700 to-gray-900 text-white shadow-2xl flex items-center justify-center hover:scale-110 transition-transform duration-300"
+          title="Sign In"
+        >
+          <IoPower className="text-4xl" />
+        </button>
+      </div>
+    );
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="w-full h-[90vh] flex justify-center items-center">
+        <div className="text-white text-lg animate-pulse">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full flex justify-center items-center">
@@ -81,12 +132,22 @@ const MusicBox: React.FC<MusicBoxProps> = ({ onClose }) => {
         className="w-[95%] max-w-6xl h-[90vh] rounded-2xl backdrop-blur-md border/60 border-white shadow-2xl relative overflow-hidden"
         style={{
           backgroundImage: "url('/image.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundBlendMode: "overlay",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundBlendMode: 'overlay',
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-transparent z-0 pointer-events-none" />
+
+        {isOwner && (
+          <button
+            onClick={handleShare}
+            className="absolute top-4 left-4 z-20 p-2.5 rounded-full bg-gradient-to-tl from-green-500 via-green-600 to-green-700 text-white shadow-lg transition-all duration-200 hover:scale-105"
+            title="Share your page"
+          >
+            <IoShareSocial className="text-lg" />
+          </button>
+        )}
 
         <button
           onClick={onClose}
@@ -95,15 +156,22 @@ const MusicBox: React.FC<MusicBoxProps> = ({ onClose }) => {
           <IoClose className="text-lg" />
         </button>
 
-        <div className="relative z-10 h-full flex flex-col p-8 text-white">
-          <div className="mt-4">
-            <AddSong />
-          </div>
+        <div className="relative z-10 h-full flex flex-col p-8 text-white overflow-y-auto scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-100">
+          {isOwner && (
+            <div className="mb-6">
+              <AddSong />
+            </div>
+          )}
 
-          <div className="grid grid-cols-2 gap-4">
-            <StreamList streams={streams} onVote={handleVote} />
-            {/* <NowPlaying currentSong={""} onPlayNext={""} /> */}
-          </div>
+          {streams.length === 0 ? (
+            <div className="text-center text-white/70 text-lg mt-20">
+              No streams yet.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <StreamList streams={streams} onVote={handleVote} />
+            </div>
+          )}
         </div>
       </div>
     </div>
