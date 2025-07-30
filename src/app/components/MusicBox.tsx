@@ -3,11 +3,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import AddSong from "./AddSong";
-import { Montserrat } from "next/font/google";
 import StreamList from "./StreamList";
-import NowPlaying from "./NowPlaying";
 
-const rale = Montserrat({ subsets: ["latin"] });
 
 export interface Stream {
   id: number;
