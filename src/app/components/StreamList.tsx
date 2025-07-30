@@ -7,12 +7,12 @@ const rale = Montserrat({ subsets: ["latin"] });
 
 interface StreamListProps {
   streams: Stream[];
-  onVote: (id: number) => void;
+  onVote: (id: string) => void; 
 }
 
 const StreamList: React.FC<StreamListProps> = ({ streams, onVote }) => {
   return (
-    <div className="bg-white/60 mt-6 text-cyan-800 p-4 rounded-2xl max-h-[600px] overflow-y-auto custom-scroll">
+    <div className="bg-white/60 mt-6 text-cyan-800 p-4 rounded-2xl max-h-[600px] w-full overflow-y-auto custom-scroll">
       <h1 className={`${rale.className} font-semibold text-lg mb-4`}>
         Upcoming Streams
       </h1>

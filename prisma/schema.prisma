@@ -33,8 +33,14 @@ model Stream{
   userId        String
   upvotes       Upvote[]
   user          Listner      @relation(fields: [userId], references: [id])  
+  currentStream CurrentStream?
 }
 
+model CurrentStream {
+  userId    String  @id
+  streamId  String  @unique
+  stream    Stream? @relation(fields: [streamId], references: [id])
+}
 model Upvote{
   id        String    @id   @default(uuid())
   userId    String

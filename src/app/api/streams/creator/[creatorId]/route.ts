@@ -24,17 +24,27 @@ export async function GET(
 
   const { creatorId } = params;
 
-  const streams = await prisma.stream.findMany({
-    where: { userId: creatorId },
-    include: {
-      _count: {
-        select: { upvotes: true },
+  const [streams, activeStream] = await Promise.all([
+    prisma.stream.findMany({
+      where: { userId: creatorId },
+      include: {
+        _count: {
+          select: { upvotes: true },
+        },
+        upvotes: {
+          where: { userId: viewer.id }, // check if **viewer** has upvoted
+        },
       },
-      upvotes: {
-        where: { userId: viewer.id }, // check if **viewer** has upvoted
+    }),
+    prisma.currentStream.findFirst({
+      where: {
+        userId: viewer.id,
       },
-    },
-  });
+      include: {
+        stream: true,
+      },
+    }),
+  ]);
 
   return NextResponse.json({
     streams: streams.map(({ _count, upvotes, ...rest }) => ({
@@ -42,5 +52,6 @@ export async function GET(
       upvotes: _count.upvotes,
       hasUpvoted: upvotes.length > 0,
     })),
+    activeStream,
   });
 }

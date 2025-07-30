@@ -1,78 +1,157 @@
 "use client";
-import React from "react";
-import { BsSkipForward } from "react-icons/bs";
-import { IoPlay, IoMusicalNotes } from "react-icons/io5";
+
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { BiRefresh } from "react-icons/bi";
+import { IoPlaySkipForward, IoPause } from "react-icons/io5";
+import { toast } from "react-toastify";
 import { Montserrat } from "next/font/google";
 
 const rale = Montserrat({ subsets: ["latin"] });
-
-interface Song {
-  id: number;
-  title: string;
-  artist: string;
-  image: string;
-  upvotes: number;
-  downvotes: number;
+interface CurrentStream {
+  userId: string;
+  streamId: string;
+  stream: {
+    id: string;
+    type: "Youtube";
+    url: string;
+    extractedId: string;
+    title: string;
+    thumbnail: string;
+    active: boolean;
+    userId: string;
+  };
 }
 
 interface NowPlayingProps {
-  currentSong: Song | null;
-  onPlayNext: () => void;
+  isOwner?: boolean;
 }
 
-const NowPlaying: React.FC<NowPlayingProps> = ({ currentSong, onPlayNext }) => {
+const NowPlaying: React.FC<NowPlayingProps> = ({ isOwner = false }) => {
+  const [currentStream, setCurrentStream] = useState<CurrentStream | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const fetchCurrentStream = async () => {
+    try {
+      const res = await axios.get("/api/streams/current");
+      setCurrentStream(res.data.activeStream || null);
+    } catch (error) {
+      console.error("Failed to fetch current stream", error);
+    }
+  };
+
+  const playNextSong = async () => {
+    if (!isOwner) return;
+    
+    setLoading(true);
+    try {
+      const res = await axios.post("/api/streams/next");
+      if (res.data.mostUpvotedStream) {
+        await fetchCurrentStream();
+        setIsPlaying(true);
+        toast.success("Playing next song!");
+      }
+    } catch (error) {
+      console.error("Failed to play next song", error);
+      toast.error("No more songs in queue");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const togglePlayPause = () => {
+    setIsPlaying(!isPlaying);
+  };
+
+  const getYouTubeEmbedUrl = (url: string, extractedId: string) => {
+    // If we have extracted ID, use it directly
+    if (extractedId) {
+      return `https://www.youtube.com/embed/${extractedId}?autoplay=${isPlaying ? 1 : 0}&controls=1&rel=0&modestbranding=1&disablekb=1`;
+    }
+    
+    // Fallback: extract from URL
+    const videoId = url.includes('v=') 
+      ? url.split('v=')[1]?.split('&')[0]
+      : url.split('/').pop();
+    
+    return `https://www.youtube.com/embed/${videoId}?autoplay=${isPlaying ? 1 : 0}&controls=1&rel=0&modestbranding=1&disablekb=1`;
+  };
+
+
+  useEffect(() => {
+    fetchCurrentStream();
+    
+    // Refresh current stream periodically
+    const interval = setInterval(fetchCurrentStream, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!currentStream) {
+    return (
+      <div className={`bg-black/20 backdrop-blur-sm rounded-xl p-6 border border-white/10 ${rale.className}`}>
+        <h2 className="text-xl font-bold mb-4 text-center text-cyan-300">Now Playing</h2>
+        <div className="text-center text-cyan-700">
+          <p>No song currently playing</p>
+          {isOwner && (
+            <button
+              onClick={playNextSong}
+              disabled={loading}
+              className="mt-4 px-4 py-2 bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-lg hover:scale-105 transition-transform disabled:opacity-50 text-white"
+            >
+              {loading ? "Loading..." : "Start Playing"}
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const { stream } = currentStream;
+
   return (
-    <div
-      className={`bg-white/75 backdrop-blur-md mt-6 border border-cyan-200/50 rounded-xl p-4 shadow-[inset_3px_3px_6px_#ffffff90,_inset_-3px_-3px_6px_#d0faff] ${rale.className}`}
-    >
-      <h3 className="text-sm font-semibold text-cyan-700 mb-3 flex items-center">
-        <IoMusicalNotes className="mr-1" />
-        Now Playing
-      </h3>
+    <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+      <h2 className="text-xl font-bold mb-4 text-center text-cyan-300">Now Playing</h2>
+      
+      <div className="space-y-4">
+        {/* Player Embed */}
+        <div className="aspect-video rounded-lg overflow-hidden">
+          <iframe
+            src={getYouTubeEmbedUrl(stream.url, stream.extractedId)}
+            className="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
 
-      {currentSong ? (
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-cyan-500 to-cyan-700 shadow-lg flex items-center justify-center">
-            {currentSong.image ? (
-              <img
-                src={currentSong.image}
-                alt={currentSong.title}
-                className="object-cover w-full h-full"
-              />
-            ) : (
-              <IoMusicalNotes className="text-white text-2xl" />
-            )}
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-cyan-900 truncate">
-              {currentSong.title}
-            </h4>
-            <p className="text-cyan-600 text-sm truncate">{currentSong.artist}</p>
-          </div>
-
-          <div className="flex items-center gap-2">
+        {/* Controls */}
+        {isOwner && (
+          <div className="flex justify-center space-x-4">
             <button
-              className="p-3 rounded-full bg-cyan-500/80 hover:bg-cyan-600/80 text-white shadow-md transition-transform duration-200 hover:scale-105"
-              aria-label="Play"
+              onClick={togglePlayPause}
+              className="p-3 bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-full hover:scale-105 transition-transform text-white"
             >
-              <IoPlay className="text-lg" />
+              {isPlaying ? (
+                <IoPause className="text-xl" />
+              ) : (
+                <BiRefresh className="text-xl" />
+              )}
             </button>
+            
             <button
-              onClick={onPlayNext}
-              className="p-3 rounded-full bg-cyan-400/80 hover:bg-cyan-500/80 text-white shadow-md transition-transform duration-200 hover:scale-105"
-              aria-label="Skip to next"
+              onClick={playNextSong}
+              disabled={loading}
+              className="p-3 bg-gradient-to-r from-cyan-600 to-cyan-700 rounded-full hover:scale-105 transition-transform disabled:opacity-50 text-white"
             >
-              <BsSkipForward className="text-lg" />
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <IoPlaySkipForward className="text-xl" />
+              )}
             </button>
           </div>
-        </div>
-      ) : (
-        <div className="text-center text-cyan-600 py-6">
-          <IoMusicalNotes className="text-4xl mx-auto mb-3 opacity-50" />
-          <p className="text-sm">No song currently playing</p>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
