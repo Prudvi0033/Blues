@@ -1,6 +1,6 @@
 // components/StreamList.tsx
 "use client";
-import { BiUpvote } from "react-icons/bi";
+import { BiSolidUpvote } from "react-icons/bi";
 import { Stream } from "./MusicBox";
 import { Montserrat } from "next/font/google";
 
@@ -20,7 +20,7 @@ const StreamList: React.FC<StreamListProps> = ({ streams, onVote }) => {
       {streams.map((stream) => (
         <div
           key={stream.id}
-          className="flex items-center h-16 bg-white/60 rounded-xl mt-2"
+          className="flex items-center h-18 bg-white/60 rounded-xl mt-2"
         >
           <div className={`flex gap-4 items-center w-full ${rale.className}`}>
             <div className="w-24 h-24 flex items-center px-2 relative rounded-lg overflow-hidden shrink-0">
@@ -35,10 +35,10 @@ const StreamList: React.FC<StreamListProps> = ({ streams, onVote }) => {
               <div className="flex items-center gap-3 ">
                 <span className="text-[10px]">{stream.upvotes}</span>
                 <button
-                  className="px-3 py-1 bg-cyan-700 rounded text-sm hover:bg-cyan-800 text-white"
+                  className="px-3 py-1 rounded text-sm text-cyan-700"
                   onClick={() => onVote(stream.id)}
                 >
-                  <BiUpvote />
+                  <BiSolidUpvote className={stream.hasUpvoted ? "text-cyan-900" : "text-gray-400"} />
                 </button>
               </div>
             </div>

@@ -7,13 +7,14 @@ import { Montserrat } from "next/font/google";
 import StreamList from "./StreamList";
 import NowPlaying from "./NowPlaying";
 
-const rale = Montserrat({ subsets: ['latin'] });
+const rale = Montserrat({ subsets: ["latin"] });
 
 export interface Stream {
   id: number;
   title: string;
   thumbnail: string;
   upvotes: number;
+  hasUpvoted: boolean;
 }
 
 export interface MusicBoxProps {
@@ -34,8 +35,10 @@ const MusicBox: React.FC<MusicBoxProps> = ({ onClose }) => {
         title: stream.title,
         thumbnail: stream.thumbnail,
         upvotes: stream.upvotes,
+        hasUpvoted: stream.hasUpvoted,
       }));
       setStreams(parsed);
+      console.log(streams);
     } catch (error) {
       console.error("Failed to fetch streams", error);
     }
@@ -47,12 +50,32 @@ const MusicBox: React.FC<MusicBoxProps> = ({ onClose }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleVote = (id: number) => {
+  const handleVote = async (id: number) => {
     setStreams((prev) =>
       prev.map((stream) =>
-        stream.id === id ? { ...stream, upvotes: stream.upvotes + 1 } : stream
+        stream.id === id
+          ? {
+              ...stream,
+              upvotes: stream.upvotes + (stream.hasUpvoted ? -1 : 1),
+              hasUpvoted: !stream.hasUpvoted,
+            }
+          : stream
       )
     );
+
+    try {
+      const stream = streams.find((s) => s.id == id);
+      if(!stream) return;
+
+      const route = stream.hasUpvoted ? "/api/streams/downvotes" : "/api/streams/upvotes"
+      
+      await axios.post(route, 
+        {streamId: id},
+        {withCredentials: true}
+      )
+    } catch (error) {
+      console.log("Error in votes", error);
+    }
   };
 
   return (
@@ -82,7 +105,7 @@ const MusicBox: React.FC<MusicBoxProps> = ({ onClose }) => {
 
           <div className="grid grid-cols-2 gap-4">
             <StreamList streams={streams} onVote={handleVote} />
-            <NowPlaying currentSong={""} onPlayNext={""} />
+            {/* <NowPlaying currentSong={""} onPlayNext={""} /> */}
           </div>
         </div>
       </div>
