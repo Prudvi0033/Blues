@@ -30,10 +30,14 @@ model Stream{
   title         String
   thumbnail     String
   active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  expiresAt     DateTime  @default(dbgenerated("NOW() + INTERVAL '1 DAY'")) // Auto-expire after 1 day
   userId        String
   upvotes       Upvote[]
   user          Listner      @relation(fields: [userId], references: [id])  
   currentStream CurrentStream?
+  
+  @@index([expiresAt]) // Index for efficient cleanup
 }
 
 model CurrentStream {
