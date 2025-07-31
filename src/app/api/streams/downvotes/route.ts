@@ -1,8 +1,8 @@
+import { authOptions } from "@/app/lib/options";
 import prisma from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { authOptions } from "../../auth/[...nextauth]/route";
 
 const DownvoteSchema = z.object({
   streamId: z.string(),

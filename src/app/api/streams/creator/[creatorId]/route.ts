@@ -1,15 +1,13 @@
-// File: /api/streams/creator/[creatorId]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/lib/options";
 import prisma from "@/app/lib/prisma";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { creatorId: string } }
+  context: { params: Promise<{ creatorId: string }> }
 ) {
   const session = await getServerSession(authOptions);
-
   if (!session || !session.user?.email) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
@@ -22,7 +20,8 @@ export async function GET(
     return NextResponse.json({ message: "User not found" }, { status: 403 });
   }
 
-  const { creatorId } = params;
+  // Await the params Promise
+  const { creatorId } = await context.params;
 
   const [streams, activeStream] = await Promise.all([
     prisma.stream.findMany({
@@ -32,7 +31,7 @@ export async function GET(
           select: { upvotes: true },
         },
         upvotes: {
-          where: { userId: viewer.id }, // check if **viewer** has upvoted
+          where: { userId: viewer.id },
         },
       },
     }),

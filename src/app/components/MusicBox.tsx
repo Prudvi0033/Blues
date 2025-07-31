@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { IoClose, IoPower, IoShareSocial } from "react-icons/io5";
 import AddSong from "./AddSong";
 import StreamList from "./StreamList";
@@ -32,7 +32,8 @@ const MusicBox: React.FC<MusicBoxProps> = ({ onClose, creatorId }) => {
 
   const isMyStreams = !creatorId;
 
-  const fetchStreams = async () => {
+  // Wrap fetchStreams in useCallback to fix the dependency warning
+  const fetchStreams = useCallback(async () => {
     try {
       const endpoint = isMyStreams
         ? "/api/streams/my"
@@ -51,7 +52,7 @@ const MusicBox: React.FC<MusicBoxProps> = ({ onClose, creatorId }) => {
     } catch (error) {
       console.error("Failed to fetch streams", error);
     }
-  };
+  }, [isMyStreams, creatorId]); // Dependencies that fetchStreams uses
 
   const handleShare = async () => {
     try {
@@ -113,7 +114,7 @@ const MusicBox: React.FC<MusicBoxProps> = ({ onClose, creatorId }) => {
       const interval = setInterval(fetchStreams, REFRESH_INTERVAL);
       return () => clearInterval(interval);
     }
-  }, [creatorId, status]);
+  }, [status, fetchStreams]); // Now includes fetchStreams properly
 
   useEffect(() => {
     if (!creatorId || creatorId === session?.user?.email) {

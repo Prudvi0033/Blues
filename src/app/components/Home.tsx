@@ -7,7 +7,7 @@ import Slider from "./Slider";
 import MercuryCard from "./MercuryCard";
 import EnterMusic from "./EnterMusic";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]/route";
+import { authOptions } from "../lib/options";
 
 const rale = Raleway({ subsets: ["latin"] });
 const monte = Montserrat({ subsets: ["latin"] });
