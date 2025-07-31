@@ -19,7 +19,7 @@ export async function GET() {
   }
 
   const streams = await prisma.stream.findMany({
-    where: { userId: user.id },
+    where: { userId: user.id, active: true },
     include: {
       _count: {
         select: {

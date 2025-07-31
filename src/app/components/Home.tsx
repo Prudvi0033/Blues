@@ -6,11 +6,14 @@ import Snote from "./Snote";
 import Slider from "./Slider";
 import MercuryCard from "./MercuryCard";
 import EnterMusic from "./EnterMusic";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../api/auth/[...nextauth]/route";
 
 const rale = Raleway({ subsets: ["latin"] });
 const monte = Montserrat({ subsets: ["latin"] });
 
-const Home = () => {
+const Home = async() => {
+  const session = await getServerSession(authOptions);
   return (
     <>
       <div className="min-h-screen flex items-center justify-center relative pt-18">
@@ -82,11 +85,7 @@ const Home = () => {
           </div>
 
           <div className="w-full">
-            <Slider />
-          </div>
-
-          <div className="w-full">
-            <EnterMusic/>
+            {session?.user?.email ?  <EnterMusic/> : <Slider/>}
           </div>
         </div>
       </div>

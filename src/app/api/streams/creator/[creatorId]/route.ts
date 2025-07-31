@@ -26,7 +26,7 @@ export async function GET(
 
   const [streams, activeStream] = await Promise.all([
     prisma.stream.findMany({
-      where: { userId: creatorId },
+      where: { userId: creatorId, active: true },
       include: {
         _count: {
           select: { upvotes: true },

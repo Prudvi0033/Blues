@@ -50,7 +50,7 @@ model Upvote{
   userId    String
   streamId  String
   user      Listner    @relation(fields: [userId], references: [id])
-  stream    Stream  @relation(fields: [streamId], references: [id])
+  stream    Stream  @relation(fields: [streamId], references: [id], onDelete: Cascade)
   @@unique([userId, streamId])
 }
 

@@ -17,6 +17,7 @@ const EnterMusic = () => {
     setIsModalOpen(false);
   };
 
+  // Only render if user is authenticated
   if (status === "loading" || !session) {
     return null;
   }
@@ -85,7 +86,7 @@ const EnterMusic = () => {
               onClick={(e) => e.stopPropagation()}
               className="relative max-w-6xl w-full mx-4"
             >
-              <MusicBox creatorId="" onClose={handleCloseModal} />
+              <MusicBox onClose={handleCloseModal} />
             </motion.div>
           </motion.div>
         )}

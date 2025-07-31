@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { Montserrat } from "next/font/google";
 
 const rale = Montserrat({ subsets: ["latin"] });
+
 interface CurrentStream {
   userId: string;
   streamId: string;
@@ -25,6 +26,7 @@ interface CurrentStream {
 
 interface NowPlayingProps {
   isOwner?: boolean;
+  onStreamChange?: () => void;
 }
 
 const NowPlaying: React.FC<NowPlayingProps> = ({ isOwner = false }) => {
@@ -78,19 +80,17 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ isOwner = false }) => {
     return `https://www.youtube.com/embed/${videoId}?autoplay=${isPlaying ? 1 : 0}&controls=1&rel=0&modestbranding=1&disablekb=1`;
   };
 
-
   useEffect(() => {
     fetchCurrentStream();
     
-    // Refresh current stream periodically
     const interval = setInterval(fetchCurrentStream, 10000);
     return () => clearInterval(interval);
   }, []);
 
   if (!currentStream) {
     return (
-      <div className={`bg-black/20 backdrop-blur-sm rounded-xl p-6 border border-white/10 ${rale.className}`}>
-        <h2 className="text-xl font-bold mb-4 text-center text-cyan-300">Now Playing</h2>
+      <div className={`bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-white/10 ${rale.className}`}>
+        <h2 className="text-xl font-bold mb-4 text-center text-cyan-800">Now Playing</h2>
         <div className="text-center text-cyan-700">
           <p>No song currently playing</p>
           {isOwner && (
@@ -110,8 +110,8 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ isOwner = false }) => {
   const { stream } = currentStream;
 
   return (
-    <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-      <h2 className="text-xl font-bold mb-4 text-center text-cyan-300">Now Playing</h2>
+    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+      <h2 className="text-xl font-bold mb-4 text-center text-cyan-800">Now Playing</h2>
       
       <div className="space-y-4">
         {/* Player Embed */}

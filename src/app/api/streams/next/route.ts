@@ -55,8 +55,8 @@ export async function POST() {
         id: mostUpvotedStream.id,
       },
       data: {
-        active: false,
-      },
+        active: false
+      }
     }),
   ]);
 
